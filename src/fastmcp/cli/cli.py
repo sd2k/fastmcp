@@ -5,11 +5,11 @@ import importlib.util
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Tuple, Dict
+from typing import Dict, Optional, Tuple
 
+import dotenv
 import typer
 from typing_extensions import Annotated
-import dotenv
 
 from fastmcp.cli import claude
 from fastmcp.utilities.logging import get_logger
@@ -423,7 +423,11 @@ def install(
         # Load from .env file if specified
         if env_file:
             try:
-                env_dict.update(dotenv.dotenv_values(env_file))
+                env_dict |= {
+                    k: v
+                    for k, v in dotenv.dotenv_values(env_file).items()
+                    if v is not None
+                }
             except Exception as e:
                 logger.error(f"Failed to load .env file: {e}")
                 sys.exit(1)
